@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Create and Write File</title>
+		<script src="js/jquery-1.10.2.min.js"></script>
+		<script type = "text/javascript" src="cordova.js"></script>
+		<script type = "text/javascript">
+			var fileObject;
+			
+			document.addEventListener("deviceReady",onDeviceReady,true);
+			
+			function onDeviceReady()
+			{
+				window.requestFileSystem(LocalFileSystem.PERSISTENT,0,onFileSystemSuccess,onError);
+			}
+			
+			function onFileSystemSuccess(fileSystem)
+			{	
+				fileSystem.root.getFile("readme.txt",
+				{create:true,execlusive:false},
+				gotFileEntry,onError);	
+			}
+			
+			function gotFileEntry(fileEntry)
+			{
+				fileObject = fileEntry;
+				$('#saveFile_btn').on('click'function(){
+					saveFileContent();
+				});
+			}
+			
+			function saveFileContent()
+			{
+				fileObject.createWriter(gotFileWriter,onError);
+			}
+			
+			function gotFileWriter(writer)
+			{
+				var myText = document.getElementById('my_text').value;
+				writer.write(myText);
+				writer.onwriteend = function(evt)
+				{
+					$('#message').html('<p>File content have been written.<br /><strong>File path:</strong> ' + fileObject.fullPath + '</p>');
+					var reader = new FileReader();
+					reader.readAsText(fileObject);
+					reader.onload = function(evt)
+					{
+						$('#contents').html('<strong>File contents:</strong> <br />' + evt.target.result);
+					};
+				};
+			}
+			
+			function onError(error)
+			{
+				alert(error.code);
+			}
+		
+		</script>
+	</head>
+	<body>
+		<input type="text" id="my_text" ></input>
+		<input type="button" id="saveFile_btn" value="Save"></input>
+		<div id="contents"></div>
+		<div id="message"></div>
+		
+		
+	</body>
+</html>
